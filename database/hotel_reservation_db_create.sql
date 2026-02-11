@@ -1,0 +1,91 @@
+CREATE DATABASE IF NOT EXISTS hotel_reservation_db;
+USE hotel_reservation_db;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role ENUM('ADMIN','RECEPTIONIST') NOT NULL DEFAULT 'RECEPTIONIST',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS rooms (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  room_number VARCHAR(20) NOT NULL UNIQUE,
+  room_type ENUM('SINGLE','DOUBLE','DELUXE','SUITE') NOT NULL,
+  rate_per_night DECIMAL(10,2) NOT NULL,
+  status ENUM('AVAILABLE','MAINTENANCE') NOT NULL DEFAULT 'AVAILABLE',
+  description LONGTEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS facilities (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(80) NOT NULL UNIQUE,
+  category ENUM('FOOD','AMENITY','SERVICE','OTHER') NOT NULL DEFAULT 'OTHER',
+  description VARCHAR(255) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS room_facilities (
+  room_id INT NOT NULL,
+  facility_id INT NOT NULL,
+  extra_price_per_night DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  PRIMARY KEY (room_id, facility_id),
+  CONSTRAINT fk_rf_room
+    FOREIGN KEY (room_id) REFERENCES rooms(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_rf_facility
+    FOREIGN KEY (facility_id) REFERENCES facilities(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS reservations (
+  reservation_id BIGINT PRIMARY KEY,
+  guest_count INT NOT NULL DEFAULT 1,
+  address VARCHAR(255) NULL,
+  contact_number VARCHAR(20) NOT NULL,
+  room_type ENUM('SINGLE','DOUBLE','DELUXE','SUITE') NOT NULL,
+  check_in_date DATE NOT NULL,
+  check_out_date DATE NOT NULL,
+  room_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_res_room
+    FOREIGN KEY (room_id) REFERENCES rooms(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+CREATE INDEX idx_res_room_dates ON reservations (room_id, check_in_date, check_out_date);
+
+CREATE TABLE IF NOT EXISTS reservation_guests (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  reservation_id BIGINT NOT NULL,
+  full_name VARCHAR(100) NOT NULL,
+  age INT NULL,
+  nic VARCHAR(20) NULL,
+  passport_no VARCHAR(30) NULL,
+  is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_rg_res
+    FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX idx_rg_res ON reservation_guests (reservation_id);
+
+CREATE TABLE IF NOT EXISTS bills (
+  bill_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  reservation_id BIGINT NOT NULL UNIQUE,
+  nights INT NOT NULL,
+  rate_per_night DECIMAL(10,2) NOT NULL,
+  extras_total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  sub_total DECIMAL(10,2) NOT NULL,
+  total DECIMAL(10,2) NOT NULL,
+  generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_bill_res
+    FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);
