@@ -1,16 +1,19 @@
 package com.example.hotelreservationsystem.util;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled("Disabled in CI – requires real database")
 class DBConnectionTest {
 
     @Test
     void testDatabaseConnectionIsSuccessful() {
         try (Connection connection = DBConnection.getConnection()) {
+
             assertNotNull(connection, "Connection should not be null");
             assertFalse(connection.isClosed(), "Connection should be open");
 
