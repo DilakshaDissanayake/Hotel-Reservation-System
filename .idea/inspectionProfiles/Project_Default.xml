@@ -6,15 +6,18 @@
       <option name="ignoredModules">
         <list>
           <option value="Hotel-Reservation-System" />
+          <option value="Hotel-Reservation-System" />
         </list>
       </option>
       <option name="ignoredPackages">
         <list>
           <option value="org.apache.logging.log4j:log4j-core:2.25.2" />
+          <option value="com.google.protobuf:protobuf-java:3.25.1" />
         </list>
       </option>
       <option name="ignoredReasons">
         <list>
+          <option value="Not exploitable" />
           <option value="Not exploitable" />
         </list>
       </option>
