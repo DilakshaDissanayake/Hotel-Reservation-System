@@ -11,7 +11,6 @@ class DBConnectionTest {
     @Test
     void testDatabaseConnectionIsSuccessful() {
         try (Connection connection = DBConnection.getConnection()) {
-
             assertNotNull(connection, "Connection should not be null");
             assertFalse(connection.isClosed(), "Connection should be open");
 
