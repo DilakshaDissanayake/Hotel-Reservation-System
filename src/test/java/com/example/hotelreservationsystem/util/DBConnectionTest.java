@@ -7,7 +7,7 @@ import java.sql.Connection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("Disabled in CI – requires real database")
+//@Disabled("Disabled in CI – requires real database")
 class DBConnectionTest {
 
     @Test

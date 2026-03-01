@@ -69,7 +69,9 @@ CREATE TABLE IF NOT EXISTS reservation_guests (
   full_name VARCHAR(100) NOT NULL,
   age INT NULL,
   nic VARCHAR(20) NULL,
+  email varchar(120) NOT NULL UNIQUE,
   passport_no VARCHAR(30) NULL,
+  phone_number VARCHAR(20) NULL,
   is_primary BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_rg_res

@@ -4,26 +4,38 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap');
 
-html,
-body.app-body {
-    height: 100% !important;
-    overflow: hidden !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #003D56 !important;
+/* ================= AUTH PAGES ================= */
+
+body.app-body-auth {
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    background: #003D56;
 }
 
-.app-scene {
-    position: fixed !important;
-    top: 0; right: 0; bottom: 0; left: 0;
-    width: 100% !important;
-    height: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    overflow: hidden !important;
-    z-index: 1000;
-    font-family: 'Jost', sans-serif;
+/* ================= MAIN PAGES ================= */
+
+body.app-body-main {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, #f6fbff 0%, #e9f3f9 50%, #f7f8fb 100%);
+    min-height: 100vh;
+}
+
+body.app-main {
+    background: linear-gradient(180deg, #f6fbff 0%, #e9f3f9 50%, #f7f8fb 100%);
+    min-height: 100vh; /* Ensure the main content covers the full viewport height */
+}
+
+body.app-body-auth .app-scene {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 1;
 }
 
 .app-bg {
@@ -118,7 +130,7 @@ body.app-body {
 .app-corner--bl { bottom: 85px; left: 20px;   transform: scaleY(-1); }
 .app-corner--br { bottom: 85px; right: 20px;  transform: scale(-1,-1); }
 
-.app-card-wrap {
+body.app-body-auth .app-card-wrap  {
     position: relative;
     z-index: 100;
     width: 430px;
@@ -228,19 +240,6 @@ body.app-body {
     white-space: nowrap; z-index: 20; pointer-events: none;
 }
 
-.app-body {
-    margin: 0;
-    height: 100vh;
-    background: linear-gradient(135deg,#006d8f,#003d56);
-}
-
-.app-scene {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .app-card {
     background: #fff;
     padding: 2.5rem;
@@ -249,6 +248,100 @@ body.app-body {
     box-shadow: 0 30px 80px rgba(0,0,0,.35);
 }
 
+/* ================= MAIN FOOTER ================= */
+
+.app-footer {
+    background: linear-gradient(180deg, #ffffff 0%, #f2f7fb 100%);
+    border-top: 1px solid #dce6ee;
+}
+
+.app-footer-text {
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    color: #edecec;
+    letter-spacing: 0.4px;
+}
+
+
+/* ================= NAVBAR ================= */
+
+.app-navbar {
+    background: linear-gradient(135deg, #0A9DC0 0%, #007BA3 55%, #005F82 100%);
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.app-brand {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 20px;
+    color: #ffffff !important;
+    letter-spacing: 0.4px;
+}
+
+.app-brand i {
+    margin-right: 6px;
+}
+
+.app-link {
+    color: rgba(255,255,255,0.85) !important;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.app-link:hover {
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+.app-link.active {
+    color: #ffffff !important;
+    position: relative;
+}
+
+.app-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background: #FFE08A;
+    border-radius: 2px;
+}
+
+/* Register Button */
+.app-btn-register {
+    background: #ffffff;
+    color: #005F82;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 6px 14px;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.app-btn-register:hover {
+    background: #f2f7fb;
+    transform: translateY(-1px);
+}
+
+/* Logout Button */
+.app-btn-logout {
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.app-btn-logout:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: #ffffff;
+}
 
 @media (max-width: 500px) {
     .app-card-wrap  { width: 94vw; }

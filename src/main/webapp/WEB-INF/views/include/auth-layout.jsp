@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/app.css">
 </head>
 
-<body class="app-body">
+<body class="app-body-auth">
 
 <div class="app-scene">
     <div class="app-bg"></div>

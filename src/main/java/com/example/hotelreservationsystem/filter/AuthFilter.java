@@ -18,9 +18,24 @@ public class AuthFilter implements Filter {
 
     private static final Set<String> PUBLIC_PATHS = Set.of(
             "/login",
-            "/register",
             "/assets",
             "/assets/"
+    );
+
+    private static final Set<String> PUBLIC_EXTENSIONS = Set.of(
+            ".css",
+            ".js",
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".svg",
+            ".gif",
+            ".woff",
+            ".woff2",
+            ".ttf",
+            ".eot",
+            ".ico",
+            ".map"
     );
 
     @Override
@@ -37,7 +52,8 @@ public class AuthFilter implements Filter {
                 .substring(httpRequest.getContextPath().length());
 
         boolean isPublic = PUBLIC_PATHS.stream()
-                .anyMatch(path::startsWith);
+                .anyMatch(path::startsWith)
+                || isStaticAsset(path);
 
         HttpSession session = httpRequest.getSession(false);
         boolean loggedIn = session != null && session.getAttribute("authUser") != null;
@@ -49,5 +65,10 @@ public class AuthFilter implements Filter {
                     httpRequest.getContextPath() + "/login"
             );
         }
+    }
+
+    private boolean isStaticAsset(String path) {
+        String lower = path.toLowerCase();
+        return PUBLIC_EXTENSIONS.stream().anyMatch(lower::endsWith);
     }
 }

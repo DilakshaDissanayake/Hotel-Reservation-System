@@ -28,6 +28,12 @@ public class AuthController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession existingSession = request.getSession(false);
+        if (existingSession != null && existingSession.getAttribute("authUser") != null) {
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+            return;
+        }
+
         HttpSession session = request.getSession(true);
 
         if (session.getAttribute("csrfToken") == null) {
@@ -79,7 +85,7 @@ public class AuthController extends HttpServlet {
 
             newSession.setAttribute("csrfToken", generateCsrfToken());
 
-            response.sendRedirect(request.getContextPath() + "/");
+            response.sendRedirect(request.getContextPath() + "/dashboard");
 
         } else {
             request.setAttribute("error", "Invalid username or password.");
@@ -97,6 +103,7 @@ public class AuthController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/include/auth-layout.jsp")
                 .forward(request, response);
     }
+
 
     private String generateCsrfToken() {
         return UUID.randomUUID().toString();

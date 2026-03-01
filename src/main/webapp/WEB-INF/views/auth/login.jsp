@@ -3,7 +3,6 @@
 <%
     String error = (String) request.getAttribute("error");
 %>
-<div class="auth-scene">
     <div class="app-card" style="background: rgba(255,255,255,0.98); padding: 2.5rem; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,0.25); width: 100%; max-width: 420px;">
 
         <div class="app-logo-ring" style="position: relative; width: 70px; height: 70px; margin-inline: auto; margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(135deg, rgba(10,157,192,0.12), rgba(0,78,110,0.08)); border: 1px solid rgba(10,157,192,0.22);">
@@ -28,7 +27,7 @@
             <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}" />
 
             <div class="app-field mb-4" style="position: relative;">
-                <label class="app-label" style="display: block; font-weight: 500; color: #004E6E; font-size: 13px; margin-bottom: 8px; letter-spacing: 0.3px;">Email Address</label>
+                <label class="app-label" style="display: block; font-weight: 500; color: #004E6E; font-size: 13px; margin-bottom: 8px; letter-spacing: 0.3px;">Username</label>
                 <input
                         type="text"
                         name="username"
@@ -93,4 +92,4 @@
             <%--    </p>   --%>
 
     </div>
-</div>
+
