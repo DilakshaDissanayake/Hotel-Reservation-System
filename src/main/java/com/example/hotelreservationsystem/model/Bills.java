@@ -2,7 +2,7 @@ package com.example.hotelreservationsystem.model;
 
 public class Bills {
     private int billId;
-    private int reservation_id;
+    private int reservationId;
     private int night;
     private double ratePerNight ;
     private double extrasTotal;
@@ -13,9 +13,9 @@ public class Bills {
 
     public Bills() {}
 
-    public Bills(int billId, int reservation_id, int night, double ratePerNight, double extrasTotal, double discountAmount, double subTotal, double total, String generatedAt) {
+    public Bills(int billId, int reservationId, int night, double ratePerNight, double extrasTotal, double discountAmount, double subTotal, double total, String generatedAt) {
         this.billId = billId;
-        this.reservation_id = reservation_id;
+        this.reservationId = reservationId;
         this.night = night;
         this.ratePerNight = ratePerNight;
         this.extrasTotal = extrasTotal;
@@ -33,12 +33,12 @@ public class Bills {
         this.billId = billId;
     }
 
-    public int getReservation_id() {
-        return reservation_id;
+    public int getReservationId() {
+        return reservationId;
     }
 
-    public void setReservation_id(int reservation_id) {
-        this.reservation_id = reservation_id;
+    public void setReservationId(int reservationId) {
+        this.reservationId = reservationId;
     }
 
     public int getNight() {

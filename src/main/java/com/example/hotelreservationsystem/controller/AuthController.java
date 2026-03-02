@@ -1,9 +1,8 @@
 package com.example.hotelreservationsystem.controller;
 
+import com.example.hotelreservationsystem.config.ApplicationComponents;
 import com.example.hotelreservationsystem.model.User;
 import com.example.hotelreservationsystem.service.UserService;
-import com.example.hotelreservationsystem.service.impl.UserServiceImpl;
-import com.example.hotelreservationsystem.dao.impl.UserDAOImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,7 +20,7 @@ public class AuthController extends HttpServlet {
 
     @Override
     public void init() {
-        userService = new UserServiceImpl(new UserDAOImpl());
+        userService = ApplicationComponents.getInstance().getUserService();
     }
 
     @Override
@@ -38,6 +37,11 @@ public class AuthController extends HttpServlet {
 
         if (session.getAttribute("csrfToken") == null) {
             session.setAttribute("csrfToken", generateCsrfToken());
+        }
+
+        String status = request.getParameter("status");
+        if ("reset-success".equals(status)) {
+            request.setAttribute("message", "Password reset successful. Please login with your new password.");
         }
 
         forward(request, response);
@@ -72,7 +76,6 @@ public class AuthController extends HttpServlet {
         }
 
         Optional<User> authUser = userService.authenticate(username.trim(), password.trim());
-        System.out.println("auth User" + authUser);
 
         if (authUser.isPresent()) {
 

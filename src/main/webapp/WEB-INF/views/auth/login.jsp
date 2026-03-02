@@ -2,6 +2,7 @@
 
 <%
     String error = (String) request.getAttribute("error");
+    String message = (String) request.getAttribute("message");
 %>
     <div class="app-card" style="background: rgba(255,255,255,0.98); padding: 2.5rem; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,0.25); width: 100%; max-width: 420px;">
 
@@ -20,6 +21,12 @@
         <% if (error != null) { %>
         <div class="app-alert--error" style="background: #FFE5E5; border-left: 4px solid #C03929; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; color: #7A1E15; font-size: 13px; text-align: center;">
             <i class="bi bi-exclamation-circle"></i> <%= error %>
+        </div>
+        <% } %>
+
+        <% if (message != null) { %>
+        <div style="background: #E8F7EE; border-left: 4px solid #2E8B57; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; color: #1B5E20; font-size: 13px; text-align: center;">
+            <i class="bi bi-check-circle"></i> <%= message %>
         </div>
         <% } %>
 
@@ -59,23 +66,9 @@
                 </div>
             </div>
 
-<%--            <div class="d-flex justify-content-between align-items: center; mb-4" style="font-size: 13px;">--%>
-<%--    &lt;%&ndash;            <div class="form-check" style="position: relative;">&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                <input&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                        class="app-check-input form-check-input"&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                        type="checkbox"&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                        name="remember"&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                        id="app-remember"&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                        style="position: absolute; opacity: 0; width: 0; height: 0; cursor: pointer;">&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                <label class="form-check-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                    <span class="app-check-box" style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1.5px solid #D4A853; border-radius: 4px; background: #FFF; transition: all 0.2s ease;">&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                        <i class="bi bi-check" style="color: #FFF; font-size: 13px; opacity: 0; transform: scale(0.5); transition: all 0.2s ease;"></i>&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                    </span>&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                    <span style="color: #004E6E; font-weight: 500;">Remember me</span>&ndash;%&gt;--%>
-<%--    &lt;%&ndash;                </label>&ndash;%&gt;--%>
-<%--    &lt;%&ndash;            </div>&ndash;%&gt;--%>
-<%--                <a href="#" class="app-forgot" style="color: #0A9DC0; text-decoration: none; font-weight: 500; position: relative; transition: color 0.2s ease;">Forgot password?</a>--%>
-<%--            </div>--%>
+            <div class="app-field mb-4" style="text-align: center;">
+                <a href="<%= request.getContextPath() %>/forgot-password" style="color: #004E6E; font-size: 13px; text-decoration: underline;">Forgot Password?</a>
+            </div>
 
             <button
                     type="submit"
