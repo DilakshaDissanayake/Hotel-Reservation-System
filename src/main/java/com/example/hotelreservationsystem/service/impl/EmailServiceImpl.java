@@ -58,11 +58,11 @@ public class EmailServiceImpl implements EmailService {
         } catch (MessagingException | ServiceConfigurationError e) {
             if (hasCause(e)) {
                 LOGGER.log(Level.SEVERE,
-                        "Failed to send email because Tomcat temp directory is not writable. "
-                                + "Set CATALINA_TMPDIR to a writable folder outside Program Files.",
-                        e);
+                        "Failed to send email — Tomcat temp dir not writable. " +
+                                "Set CATALINA_TMPDIR to a writable folder outside Program Files.", e);
+            } else {
+                LOGGER.log(Level.SEVERE, "Failed to send email", e);
             }
-            LOGGER.log(Level.SEVERE, "Failed to send email", e);
             throw new RuntimeException("Failed to send email", e);
         }
     }
@@ -86,5 +86,11 @@ public class EmailServiceImpl implements EmailService {
                 + resetLink
                 + "\n\nIf you did not request this, you can ignore this email.";
         sendEmail(to, subject, body);
+    }
+
+    @Override
+    public void sendBillEmail(String to, String billBody) {
+        String subject = "Ocean View Resort - Reservation Invoice";
+        sendEmail(to, subject, billBody);
     }
 }

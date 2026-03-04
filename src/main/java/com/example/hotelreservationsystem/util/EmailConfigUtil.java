@@ -4,8 +4,6 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
 
 public final class EmailConfigUtil {
@@ -20,10 +18,12 @@ public final class EmailConfigUtil {
 
         Properties classpathEnv = loadClasspathEnv();
 
-        String smtpHost = getRequired(dotenv, classpathEnv, "MAIL_HOST");
-        String smtpPort = getRequired(dotenv, classpathEnv, "MAIL_PORT");
-        String username = getRequired(dotenv, classpathEnv, "MAIL_USERNAME");
-        String password = getRequired(dotenv, classpathEnv, "MAIL_PASSWORD");
+        // Use getOptional() instead of getRequired() so the app can start
+        // even without mail configuration; validation happens inside sendEmail()
+        String smtpHost = getOptional(dotenv, classpathEnv, "MAIL_HOST", null);
+        String smtpPort = getOptional(dotenv, classpathEnv, "MAIL_PORT", "587");
+        String username = getOptional(dotenv, classpathEnv, "MAIL_USERNAME", null);
+        String password = getOptional(dotenv, classpathEnv, "MAIL_PASSWORD", null);
 
         return new EmailConfig(
                 smtpHost,
@@ -53,21 +53,6 @@ public final class EmailConfigUtil {
         }
 
         return properties;
-    }
-
-    private static boolean hasMailConfiguration(Dotenv dotenv, Properties classpathEnv) {
-        return !isBlank(getOptional(dotenv, classpathEnv, "MAIL_HOST", null))
-                || !isBlank(getOptional(dotenv, classpathEnv, "MAIL_PORT", null))
-                || !isBlank(getOptional(dotenv, classpathEnv, "MAIL_USERNAME", null))
-                || !isBlank(getOptional(dotenv, classpathEnv, "MAIL_PASSWORD", null));
-    }
-
-    private static String getRequired(Dotenv dotenv, Properties classpathEnv, String key) {
-        String value = getOptional(dotenv, classpathEnv, key, null);
-        if (isBlank(value)) {
-            throw new IllegalStateException("Missing required environment variable: " + key);
-        }
-        return value;
     }
 
     private static String getOptional(Dotenv dotenv, Properties classpathEnv, String key, String defaultValue) {

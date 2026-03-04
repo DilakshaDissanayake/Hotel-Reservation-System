@@ -21,13 +21,13 @@ public class DBConnection {
 
             String url = getEnv(dotenv, "DB_URL");
             String username = getEnv(dotenv, "DB_USERNAME");
-//            String password = getEnv(dotenv, "DB_PASSWORD");
+            String password = getEnv(dotenv, "DB_PASSWORD");
             String driver = getEnv(dotenv, "DB_DRIVER");
 
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(url);
             config.setUsername(username);
-//            config.setPassword(password);
+            config.setPassword(password);
             config.setDriverClassName(driver);
 
             config.setMaximumPoolSize(10);
@@ -43,13 +43,15 @@ public class DBConnection {
 
     private static String getEnv(Dotenv dotenv, String key) {
         String value = dotenv.get(key);
-        if (value == null || value.isBlank()) {
+        if (value == null) {
             value = System.getenv(key);
         }
-        if (value == null || value.isBlank()) {
+        
+        // Allow DB_PASSWORD to be empty, but other keys must be present and non-blank
+        if (value == null || (value.isBlank() && !"DB_PASSWORD".equals(key))) {
             throw new IllegalStateException("Missing required environment variable: " + key);
         }
-        return value;
+        return value != null ? value.trim() : "";
     }
 
     public static Connection getConnection() throws SQLException {
