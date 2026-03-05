@@ -9,6 +9,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.example.hotelreservationsystem.model.User;
 
 import java.io.IOException;
 import java.util.Set;
@@ -40,6 +41,15 @@ public class AuthFilter implements Filter {
             ".map"
     );
 
+    private static final java.util.Set<String> ADMIN_ONLY_PATHS = java.util.Set.of(
+            "/staff",
+            "/rooms/edit"
+    );
+
+    private static final java.util.Set<String> ADMIN_ONLY_POST_PATHS = java.util.Set.of(
+            "/rooms"
+    );
+
     @Override
     public void doFilter(
             ServletRequest request,
@@ -58,9 +68,22 @@ public class AuthFilter implements Filter {
                 || isStaticAsset(path);
 
         HttpSession session = httpRequest.getSession(false);
-        boolean loggedIn = session != null && session.getAttribute("authUser") != null;
+        User authUser = (session != null) ? (User) session.getAttribute("authUser") : null;
+        boolean loggedIn = authUser != null;
 
-        if (loggedIn || isPublic) {
+        if (loggedIn) {
+            String userRole = authUser.getRole();
+            boolean isAdminPath = ADMIN_ONLY_PATHS.stream().anyMatch(path::startsWith);
+            boolean isAdminPost = "POST".equalsIgnoreCase(httpRequest.getMethod()) &&
+                                 ADMIN_ONLY_POST_PATHS.stream().anyMatch(path::startsWith);
+
+            if ((isAdminPath || isAdminPost) && !"ADMIN".equals(userRole)) {
+                httpResponse.sendRedirect(httpRequest.getContextPath() + "/dashboard?error=Access%20Denied");
+                return;
+            }
+
+            chain.doFilter(request, response);
+        } else if (isPublic) {
             chain.doFilter(request, response);
         } else {
             httpResponse.sendRedirect(

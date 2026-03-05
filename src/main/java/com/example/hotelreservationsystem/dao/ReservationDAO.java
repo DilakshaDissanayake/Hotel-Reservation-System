@@ -60,6 +60,8 @@ public interface ReservationDAO {
                                            String email,
                                            String phoneNumber);
 
+    boolean updateRoomStatus(int roomId, String status);
+
     List<ReservationSummaryDTO> findAllReservationSummaries();
 
     Optional<ReservationSummaryDTO> findReservationSummaryById(long reservationId);
@@ -73,4 +75,8 @@ public interface ReservationDAO {
                             double total);
 
     Optional<BillDetailsDTO> findBillDetailsByReservationId(long reservationId);
+
+    boolean updateReservationStatus(long reservationId, String status);
+
+    List<ReservationSummaryDTO> findUpcomingReservationsByRoom(int roomId);
 }

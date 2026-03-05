@@ -4,6 +4,7 @@ import com.example.hotelreservationsystem.model.User;
 
 import java.sql.Timestamp;
 import java.util.Optional;
+import java.util.List;
 
 public interface UserDAO {
 
@@ -14,6 +15,8 @@ public interface UserDAO {
     Optional<User> findById(int id);
 
     int createUser(User user);
+
+    List<User> findAll();
 
     void savePasswordResetToken(int userId, String tokenHash, Timestamp expiresAt);
 

@@ -76,6 +76,39 @@ public class UserServiceImpl implements UserService {
         return userDAO.resetPasswordByValidToken(tokenHash, hashedPassword);
     }
 
+    @Override
+    public int createUser(String firstName, String lastName, String username, String email, String password, String role) {
+        validateUser(firstName, lastName, username, email, password, role);
+
+        User user = new User();
+        user.setFirstName(firstName.trim());
+        user.setLastName(lastName.trim());
+        user.setUsername(username.trim());
+        user.setEmail(email.trim());
+        user.setPasswordHash(PasswordUtil.hash(password.trim()));
+        user.setRole(role.trim().toUpperCase());
+
+        return userDAO.createUser(user);
+    }
+
+    @Override
+    public java.util.List<User> getAllUsers() {
+        return userDAO.findAll();
+    }
+
+    private void validateUser(String firstName, String lastName, String username, String email, String password, String role) {
+        if (isBlank(firstName)) throw new IllegalArgumentException("First name is required.");
+        if (isBlank(lastName)) throw new IllegalArgumentException("Last name is required.");
+        if (isBlank(username)) throw new IllegalArgumentException("Username is required.");
+        if (isBlank(email) || !email.contains("@")) throw new IllegalArgumentException("Valid email is required.");
+        if (isBlank(password) || password.trim().length() < 8) throw new IllegalArgumentException("Password must be at least 8 characters.");
+        if (isBlank(role)) throw new IllegalArgumentException("Role is required.");
+    }
+
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
     private String sha256(String value) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

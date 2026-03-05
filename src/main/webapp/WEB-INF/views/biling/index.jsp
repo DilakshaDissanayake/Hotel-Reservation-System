@@ -127,8 +127,25 @@
                                             <div class="d-flex gap-2">
                                                 <button class="btn btn-primary" onclick="window.print()">Print
                                                     Bill</button>
-                                                <a href="${pageContext.request.contextPath}/reservations"
-                                                    class="btn btn-outline-secondary">Done</a>
+
+                                                <% com.example.hotelreservationsystem.dto.ReservationSummaryDTO
+                                                    resDTO=(com.example.hotelreservationsystem.dto.ReservationSummaryDTO)
+                                                    reservation; if (!"COMPLETED".equals(resDTO.getStatus())) { %>
+                                                    <form method="post"
+                                                        action="${pageContext.request.contextPath}/biling"
+                                                        style="display:inline;">
+                                                        <input type="hidden" name="reservationId"
+                                                            value="${reservation.reservationId}">
+                                                        <input type="hidden" name="action" value="complete">
+                                                        <button type="submit" class="btn btn-success">Complete & Close
+                                                            Reservation</button>
+                                                    </form>
+                                                    <% } else { %>
+                                                        <span class="badge bg-success p-2">Stay Completed</span>
+                                                        <% } %>
+
+                                                            <a href="${pageContext.request.contextPath}/reservations"
+                                                                class="btn btn-outline-secondary">Back</a>
                                             </div>
                                             <p class="text-muted mt-3 mb-0">Invoice email is automatically sent to guest
                                                 address: ${bill.guestEmail}</p>

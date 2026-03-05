@@ -9,6 +9,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -26,6 +27,12 @@ public class RoomUpdateController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        com.example.hotelreservationsystem.model.User authUser = (session != null) ? (com.example.hotelreservationsystem.model.User) session.getAttribute("authUser") : null;
+        if (authUser == null || !"ADMIN".equals(authUser.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/dashboard?error=Access%20Denied");
+            return;
+        }
         Integer roomId = parseRoomId(request.getParameter("id"));
         if (roomId == null) {
             response.sendRedirect(request.getContextPath() + "/rooms?error=Invalid%20room%20id");
@@ -51,6 +58,12 @@ public class RoomUpdateController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        com.example.hotelreservationsystem.model.User authUser = (session != null) ? (com.example.hotelreservationsystem.model.User) session.getAttribute("authUser") : null;
+        if (authUser == null || !"ADMIN".equals(authUser.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+            return;
+        }
         Integer roomId = parseRoomId(request.getParameter("id"));
         if (roomId == null) {
             response.sendRedirect(request.getContextPath() + "/rooms?error=Invalid%20room%20id");

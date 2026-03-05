@@ -9,11 +9,12 @@ public class Reservations {
     private String checkInDate;
     private String checkOutDate;
     private int roomId;
+    private String status;
     private String createdAt;
 
     public Reservations() {}
 
-    public Reservations(int reservationId, int guestCount, String address, String contactNumber, String roomType, String checkInDate, String checkOutDate, int roomId, String createdAt) {
+    public Reservations(int reservationId, int guestCount, String address, String contactNumber, String roomType, String checkInDate, String checkOutDate, int roomId, String status, String createdAt) {
         this.reservationId = reservationId;
         this.guestCount = guestCount;
         this.address = address;
@@ -22,6 +23,7 @@ public class Reservations {
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
         this.roomId = roomId;
+        this.status = status;
         this.createdAt = createdAt;
     }
 
@@ -87,6 +89,14 @@ public class Reservations {
 
     public void setRoomId(int roomId) {
         this.roomId = roomId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getCreatedAt() {

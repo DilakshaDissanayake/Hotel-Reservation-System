@@ -10,11 +10,17 @@ import java.util.Optional;
 
 public class UserDAOImpl implements UserDAO {
 
-    private static final String FIND_BY_USERNAME =
-            "SELECT id, first_name, last_name, username, email, password_hash, role, created_at, updated_at " +
+    private final boolean emailColumnAvailable;
+
+    private static final String FIND_BY_USERNAME_TEMPLATE =
+            "SELECT id, first_name, last_name, username, %s AS email, password_hash, role, created_at, updated_at " +
                     "FROM users WHERE username = ?";
 
-        private static final String FIND_BY_EMAIL =
+    private String findByUsernameSql() {
+        return String.format(FIND_BY_USERNAME_TEMPLATE, emailColumnAvailable ? "email" : "NULL");
+    }
+
+    private static final String FIND_BY_EMAIL =
             "SELECT id, first_name, last_name, username, email, password_hash, role, created_at, updated_at " +
                 "FROM users WHERE email = ?";
 
@@ -43,11 +49,38 @@ public class UserDAOImpl implements UserDAO {
         private static final String UPDATE_PASSWORD_HASH_BY_USER_ID =
             "UPDATE users SET password_hash = ? WHERE id = ?";
 
+    private static final String SELECT_ALL_USERS_TEMPLATE =
+            "SELECT id, first_name, last_name, username, %s AS email, password_hash, role, created_at, updated_at " +
+                "FROM users ORDER BY created_at DESC";
+
+    public UserDAOImpl() {
+        this.emailColumnAvailable = hasColumn("users", "email");
+    }
+
+    private String selectAllUsersSql() {
+        return String.format(SELECT_ALL_USERS_TEMPLATE, emailColumnAvailable ? "email" : "NULL");
+    }
+
+    @Override
+    public java.util.List<User> findAll() {
+        java.util.List<User> users = new java.util.ArrayList<>();
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(selectAllUsersSql());
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                users.add(mapUser(rs));
+            }
+            return users;
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to fetch all users", e);
+        }
+    }
+
     @Override
     public Optional<User> findByUsername(String username) {
 
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(FIND_BY_USERNAME)) {
+             PreparedStatement ps = con.prepareStatement(findByUsernameSql())) {
 
             ps.setString(1, username);
 
@@ -105,7 +138,6 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public int createUser(User user) {
-
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
                      INSERT_USER,
@@ -116,7 +148,7 @@ public class UserDAOImpl implements UserDAO {
             ps.setString(3, user.getUsername());
             ps.setString(4, user.getEmail());
             ps.setString(5, user.getPasswordHash());
-            ps.setString(6, user.getRole() == null ? "RECEPTIONIST" : user.getRole());
+            ps.setString(6, user.getRole() == null ? "RECEPTIONIST" : user.getRole().toUpperCase());
 
             ps.executeUpdate();
 
@@ -257,5 +289,16 @@ public class UserDAOImpl implements UserDAO {
                 rs.getString("created_at"),
                 rs.getString("updated_at")
         );
+    }
+
+    private boolean hasColumn(String tableName, String columnName) {
+        try (Connection connection = DBConnection.getConnection();
+             ResultSet columns = connection.getMetaData()
+                     .getColumns(connection.getCatalog(), null, tableName, columnName)) {
+            return columns.next();
+        } catch (SQLException e) {
+            System.err.println("Error checking for column " + columnName + " in table " + tableName + ": " + e.getMessage());
+            return false;
+        }
     }
 }

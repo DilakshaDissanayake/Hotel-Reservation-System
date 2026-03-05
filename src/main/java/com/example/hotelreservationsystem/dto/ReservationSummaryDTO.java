@@ -12,13 +12,14 @@ public class ReservationSummaryDTO {
     private double ratePerNight;
     private String guestName;
     private String guestEmail;
+    private String status;
 
     public ReservationSummaryDTO() {
     }
 
     public ReservationSummaryDTO(long reservationId, int guestCount, String contactNumber, String checkInDate,
                                  String checkOutDate, int roomId, String roomNumber, String roomType,
-                                 double ratePerNight, String guestName, String guestEmail) {
+                                 double ratePerNight, String guestName, String guestEmail, String status) {
         this.reservationId = reservationId;
         this.guestCount = guestCount;
         this.contactNumber = contactNumber;
@@ -30,6 +31,7 @@ public class ReservationSummaryDTO {
         this.ratePerNight = ratePerNight;
         this.guestName = guestName;
         this.guestEmail = guestEmail;
+        this.status = status;
     }
 
     public long getReservationId() {
@@ -118,5 +120,13 @@ public class ReservationSummaryDTO {
 
     public void setGuestEmail(String guestEmail) {
         this.guestEmail = guestEmail;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

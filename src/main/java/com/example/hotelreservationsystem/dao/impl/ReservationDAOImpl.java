@@ -70,6 +70,7 @@ public class ReservationDAOImpl implements ReservationDAO {
                     "AND NOT EXISTS (" +
                     "   SELECT 1 FROM reservations res " +
                     "   WHERE res.room_id = r.id " +
+                    "   AND res.status = 'CONFIRMED' " +
                     "   AND NOT (res.check_out_date <= ? OR res.check_in_date >= ?)" +
                     ") " +
                     "ORDER BY r.room_number";
@@ -78,6 +79,7 @@ public class ReservationDAOImpl implements ReservationDAO {
             "SELECT COUNT(*) AS booking_count " +
                     "FROM reservations " +
                     "WHERE room_id = ? " +
+                    "AND status = 'CONFIRMED' " +
                     "AND NOT (check_out_date <= ? OR check_in_date >= ?)";
 
     private static final String SELECT_NEXT_RESERVATION_ID =
@@ -115,6 +117,7 @@ public class ReservationDAOImpl implements ReservationDAO {
         private String getSummaryColumnsSql() {
             StringBuilder cols = new StringBuilder("r.reservation_id, r.guest_count, r.check_in_date, r.check_out_date");
             cols.append(resContactColumnAvailable ? ", r.contact_number" : ", NULL AS contact_number");
+            cols.append(", r.status");
             return cols.toString();
         }
 
@@ -469,30 +472,54 @@ public class ReservationDAOImpl implements ReservationDAO {
     @Override
     public long createReservationWithPrimaryGuest(
             int guestCount,
-          String address,
-          String contactNumber,
-          String roomType,
-          LocalDate checkInDate,
-          LocalDate checkOutDate,
-          int roomId,
-          String guestFullName,
-          Integer guestAge,
-          String nic,
-          String passportNo,
-          String email,
-          String phoneNumber) {
+            String address,
+            String contactNumber,
+            String roomType,
+            LocalDate checkInDate,
+            LocalDate checkOutDate,
+            int roomId,
+            String guestFullName,
+            Integer guestAge,
+            String nic,
+            String passportNo,
+            String email,
+            String phoneNumber) {
         try (Connection connection = DBConnection.getConnection()) {
             boolean oldAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
+            connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
-            try (PreparedStatement nextIdStatement = connection.prepareStatement(SELECT_NEXT_RESERVATION_ID)) {
+            try {
+                // Lock the room for update to prevent concurrent bookings
+                try (PreparedStatement lockStmt = connection.prepareStatement("SELECT id FROM rooms WHERE id = ? FOR UPDATE")) {
+                    lockStmt.setInt(1, roomId);
+                    try (ResultSet rs = lockStmt.executeQuery()) {
+                        if (!rs.next()) {
+                            throw new SQLException("Room not found: " + roomId);
+                        }
+                    }
+                }
+
+                // Check availability again while holding the lock
+                try (PreparedStatement checkStmt = connection.prepareStatement(CHECK_ROOM_AVAILABILITY)) {
+                    checkStmt.setInt(1, roomId);
+                    checkStmt.setDate(2, Date.valueOf(checkInDate));
+                    checkStmt.setDate(3, Date.valueOf(checkOutDate));
+                    try (ResultSet rs = checkStmt.executeQuery()) {
+                        if (rs.next() && rs.getInt("booking_count") > 0) {
+                            throw new SQLException("Room is no longer available for the selected dates.");
+                        }
+                    }
+                }
 
                 long reservationId;
-                try (ResultSet resultSet = nextIdStatement.executeQuery()) {
-                    if (!resultSet.next()) {
-                        throw new SQLException("Failed to generate reservation id");
+                try (PreparedStatement nextIdStatement = connection.prepareStatement(SELECT_NEXT_RESERVATION_ID)) {
+                    try (ResultSet resultSet = nextIdStatement.executeQuery()) {
+                        if (!resultSet.next()) {
+                            throw new SQLException("Failed to generate reservation id");
+                        }
+                        reservationId = resultSet.getLong("next_id");
                     }
-                    reservationId = resultSet.getLong("next_id");
                 }
 
                 try (PreparedStatement reservationStatement = connection.prepareStatement(insertReservationSql())) {
@@ -501,12 +528,12 @@ public class ReservationDAOImpl implements ReservationDAO {
                     reservationStatement.setDate(3, Date.valueOf(checkInDate));
                     reservationStatement.setDate(4, Date.valueOf(checkOutDate));
                     reservationStatement.setInt(5, roomId);
-                    
+
                     int resIndex = 6;
                     if (resAddressColumnAvailable) reservationStatement.setString(resIndex++, emptyToNull(address));
                     if (resContactColumnAvailable) reservationStatement.setString(resIndex++, contactNumber);
                     if (resRoomTypeColumnAvailable) reservationStatement.setString(resIndex++, roomType);
-                    
+
                     reservationStatement.executeUpdate();
                 }
 
@@ -530,6 +557,16 @@ public class ReservationDAOImpl implements ReservationDAO {
                         guestStatement.setString(paramIndex++, emptyToNull(phoneNumber));
                     }
                     guestStatement.executeUpdate();
+                }
+
+                // If reservation starts today, mark room as occupied
+                if (!checkInDate.isAfter(LocalDate.now())) {
+                    try (PreparedStatement statusStmt = connection.prepareStatement("UPDATE rooms SET status = 'OCCUPIED' WHERE id = ?")) {
+                        statusStmt.setInt(1, roomId);
+                        statusStmt.executeUpdate();
+                    } catch (SQLException e) {
+                        // Skip if 'OCCUPIED' is not supported by ENUM
+                    }
                 }
 
                 connection.commit();
@@ -577,6 +614,19 @@ public class ReservationDAOImpl implements ReservationDAO {
             }
         } catch (SQLException e) {
             throw new DatabaseException("Failed to load reservation details", e);
+        }
+    }
+
+    @Override
+    public boolean updateRoomStatus(int roomId, String status) {
+        String sql = "UPDATE rooms SET status = ? WHERE id = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status.toUpperCase());
+            ps.setInt(2, roomId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            return false;
         }
     }
 
@@ -673,8 +723,42 @@ public class ReservationDAOImpl implements ReservationDAO {
                 resultSet.getString("room_type"),
                 resultSet.getDouble("rate_per_night"),
                 resultSet.getString("guest_name"),
-                resultSet.getString("guest_email")
+                resultSet.getString("guest_email"),
+                resultSet.getString("status")
         );
+    }
+
+    @Override
+    public boolean updateReservationStatus(long reservationId, String status) {
+        String sql = "UPDATE reservations SET status = ? WHERE reservation_id = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status.toUpperCase());
+            ps.setLong(2, reservationId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public List<ReservationSummaryDTO> findUpcomingReservationsByRoom(int roomId) {
+        List<ReservationSummaryDTO> reservations = new ArrayList<>();
+        String sql = String.format(SELECT_RESERVATION_SUMMARY_BY_ID_TEMPLATE.replace("WHERE r.reservation_id = ?", "WHERE r.room_id = ? AND r.check_out_date >= CURRENT_DATE AND r.status = 'CONFIRMED' ORDER BY r.check_in_date ASC"), 
+                                   getSummaryColumnsSql(), guestEmailColumnExpression());
+        
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, roomId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    reservations.add(mapReservationSummary(resultSet));
+                }
+            }
+            return reservations;
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to load upcoming reservations for room: " + roomId, e);
+        }
     }
 
     private boolean isBlank(String value) {

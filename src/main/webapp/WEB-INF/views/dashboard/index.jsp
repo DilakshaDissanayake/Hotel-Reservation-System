@@ -54,6 +54,11 @@
 					Reservations</a>
 				<a href="${pageContext.request.contextPath}/reservations?action=new"
 					class="btn btn-outline-success">Book Room</a>
+				<% com.example.hotelreservationsystem.model.User
+					dashUser=(com.example.hotelreservationsystem.model.User) session.getAttribute("authUser"); if
+					(dashUser !=null && "ADMIN" .equals(dashUser.getRole())) { %>
+					<a href="${pageContext.request.contextPath}/staff" class="btn btn-outline-warning">Manage Staff</a>
+					<% } %>
 			</div>
 		</div>
 	</div>

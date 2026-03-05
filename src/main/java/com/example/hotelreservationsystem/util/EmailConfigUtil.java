@@ -18,8 +18,6 @@ public final class EmailConfigUtil {
 
         Properties classpathEnv = loadClasspathEnv();
 
-        // Use getOptional() instead of getRequired() so the app can start
-        // even without mail configuration; validation happens inside sendEmail()
         String smtpHost = getOptional(dotenv, classpathEnv, "MAIL_HOST", null);
         String smtpPort = getOptional(dotenv, classpathEnv, "MAIL_PORT", "587");
         String username = getOptional(dotenv, classpathEnv, "MAIL_USERNAME", null);

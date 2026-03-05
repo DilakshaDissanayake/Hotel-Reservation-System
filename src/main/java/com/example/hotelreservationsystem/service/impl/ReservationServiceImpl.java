@@ -39,18 +39,7 @@ public class ReservationServiceImpl implements ReservationService {
                        double ratePerNight,
                        String status,
                        String description) {
-        if (isBlank(roomNumber)) {
-            throw new IllegalArgumentException("Room number is required.");
-        }
-        if (isBlank(roomType)) {
-            throw new IllegalArgumentException("Room type is required.");
-        }
-        if (ratePerNight <= 0) {
-            throw new IllegalArgumentException("Rate per night must be greater than zero.");
-        }
-        if (isBlank(status)) {
-            throw new IllegalArgumentException("Room status is required.");
-        }
+        validateRoomDetails(roomNumber, roomType, ratePerNight, status);
 
         return reservationDAO.createRoom(
                 roomNumber.trim().toUpperCase(),
@@ -59,6 +48,32 @@ public class ReservationServiceImpl implements ReservationService {
                 status.trim().toUpperCase(),
                 isBlank(description) ? null : description.trim()
         );
+    }
+
+    private void validateRoomDetails(String roomNumber, String roomType, double ratePerNight, String status) {
+        if (isBlank(roomNumber)) {
+            throw new IllegalArgumentException("Room number is required.");
+        }
+        if (!roomNumber.trim().matches("^[A-Za-z0-9\\-]+$")) {
+            throw new IllegalArgumentException("Room number can only contain alphanumeric characters and hyphens.");
+        }
+        if (isBlank(roomType)) {
+            throw new IllegalArgumentException("Room type is required.");
+        }
+        List<String> validTypes = List.of("SINGLE", "DOUBLE", "DELUXE", "SUITE");
+        if (!validTypes.contains(roomType.trim().toUpperCase())) {
+            throw new IllegalArgumentException("Invalid room type.");
+        }
+        if (ratePerNight <= 0) {
+            throw new IllegalArgumentException("Rate per night must be greater than zero.");
+        }
+        if (isBlank(status)) {
+            throw new IllegalArgumentException("Room status is required.");
+        }
+        List<String> validStatus = List.of("AVAILABLE", "MAINTENANCE");
+        if (!validStatus.contains(status.trim().toUpperCase())) {
+            throw new IllegalArgumentException("Invalid room status.");
+        }
     }
 
     @Override
@@ -189,18 +204,7 @@ public class ReservationServiceImpl implements ReservationService {
         if (roomId <= 0) {
             throw new IllegalArgumentException("Room id is required.");
         }
-        if (isBlank(roomNumber)) {
-            throw new IllegalArgumentException("Room number is required.");
-        }
-        if (isBlank(roomType)) {
-            throw new IllegalArgumentException("Room type is required.");
-        }
-        if (ratePerNight <= 0) {
-            throw new IllegalArgumentException("Rate per night must be greater than zero.");
-        }
-        if (isBlank(status)) {
-            throw new IllegalArgumentException("Room status is required.");
-        }
+        validateRoomDetails(roomNumber, roomType, ratePerNight, status);
 
         boolean updated = reservationDAO.updateRoomWithFacilities(
                 roomId,
@@ -269,6 +273,30 @@ public class ReservationServiceImpl implements ReservationService {
 
     private String safe(String value) {
         return value == null ? "-" : value;
+    }
+
+    @Override
+    public List<ReservationSummaryDTO> getRoomBookingDates(int roomId) {
+        if (roomId <= 0) {
+            return java.util.Collections.emptyList();
+        }
+        return reservationDAO.findUpcomingReservationsByRoom(roomId);
+    }
+
+    @Override
+    public boolean completeReservation(long reservationId) {
+        Optional<ReservationSummaryDTO> reservationOptional = reservationDAO.findReservationSummaryById(reservationId);
+        if (reservationOptional.isEmpty()) {
+            return false;
+        }
+
+        ReservationSummaryDTO reservation = reservationOptional.get();
+
+        boolean statusUpdated = reservationDAO.updateReservationStatus(reservationId, "COMPLETED");
+
+        boolean roomUpdated = reservationDAO.updateRoomStatus(reservation.getRoomId(), "AVAILABLE");
+
+        return statusUpdated && roomUpdated;
     }
 
     private boolean isBlank(String value) {

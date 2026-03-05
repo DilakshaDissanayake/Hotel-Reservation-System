@@ -55,4 +55,8 @@ public interface ReservationService {
     Optional<BillDetailsDTO> getBillByReservationId(long reservationId);
 
     boolean sendBillToGuest(long reservationId);
+
+    List<ReservationSummaryDTO> getRoomBookingDates(int roomId);
+
+    boolean completeReservation(long reservationId);
 }

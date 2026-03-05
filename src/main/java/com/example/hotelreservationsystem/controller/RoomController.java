@@ -8,8 +8,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.*;
 
 @WebServlet("/rooms")
 public class RoomController extends HttpServlet {
@@ -27,7 +29,17 @@ public class RoomController extends HttpServlet {
 
         request.setAttribute("message", request.getParameter("message"));
         request.setAttribute("error", request.getParameter("error"));
-        request.setAttribute("rooms", reservationService.getAllRooms());
+        List<com.example.hotelreservationsystem.model.Rooms> rooms = reservationService.getAllRooms();
+        Map<Integer, List<com.example.hotelreservationsystem.dto.ReservationSummaryDTO>> roomBookingMap = new HashMap<>();
+        
+        if (rooms != null) {
+            for (com.example.hotelreservationsystem.model.Rooms room : rooms) {
+                roomBookingMap.put(room.getId(), reservationService.getRoomBookingDates(room.getId()));
+            }
+        }
+
+        request.setAttribute("rooms", rooms);
+        request.setAttribute("roomBookings", roomBookingMap);
         request.setAttribute("title", "Rooms");
         request.setAttribute("contentPage", "/WEB-INF/views/room/index.jsp");
 
@@ -38,6 +50,13 @@ public class RoomController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+        com.example.hotelreservationsystem.model.User authUser = (session != null) ? (com.example.hotelreservationsystem.model.User) session.getAttribute("authUser") : null;
+        if (authUser == null || !"ADMIN".equals(authUser.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+            return;
+        }
 
         String roomNumber = request.getParameter("roomNumber");
         String roomType = request.getParameter("roomType");

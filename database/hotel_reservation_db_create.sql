@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS reservations (
   check_in_date DATE NOT NULL,
   check_out_date DATE NOT NULL,
   room_id INT NOT NULL,
+  status ENUM('CONFIRMED', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'CONFIRMED',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_res_room
     FOREIGN KEY (room_id) REFERENCES rooms(id)
