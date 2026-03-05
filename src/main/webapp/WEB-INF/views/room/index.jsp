@@ -68,9 +68,14 @@
                                 </div>
                                 <% } %>
 
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                                        <input type="text" id="roomSearch" class="form-control" placeholder="Search by room #, type, status, description...">
+                                    </div>
+
                                     <div class="card shadow-sm">
                                         <div class="table-responsive">
-                                            <table class="table table-striped table-hover mb-0">
+                                            <table id="roomTable" class="table table-striped table-hover mb-0">
                                                 <thead class="table-light">
                                                     <tr>
                                                         <th>Room #</th>
@@ -144,7 +149,7 @@
                                                         </tr>
                                                         <% } } else { %>
                                                             <tr>
-                                                                <td colspan="6" class="text-center py-4">No rooms
+                                                                <td colspan="7" class="text-center py-4">No rooms
                                                                     available.
                                                                 </td>
                                                             </tr>
@@ -153,3 +158,55 @@
                                             </table>
                                         </div>
                                     </div>
+
+                                    <script>
+                                        (function () {
+                                            function normalize(text) {
+                                                return String(text || '').toLowerCase().replace(/\s+/g, ' ').trim();
+                                            }
+
+                                            function initRoomSearch() {
+                                                var input = document.getElementById('roomSearch');
+                                                var table = document.getElementById('roomTable');
+                                                if (!input || !table) return;
+
+                                                var tbody = table.tBodies && table.tBodies.length ? table.tBodies[0] : null;
+                                                if (!tbody) return;
+
+                                                var noResultsRow = tbody.querySelector('tr.search-no-results');
+                                                if (!noResultsRow) {
+                                                    noResultsRow = document.createElement('tr');
+                                                    noResultsRow.className = 'search-no-results';
+                                                    noResultsRow.style.display = 'none';
+                                                    noResultsRow.innerHTML = '<td colspan="7" class="text-center py-4 text-muted">No matching results found.</td>';
+                                                    tbody.appendChild(noResultsRow);
+                                                }
+
+                                                var runSearch = function () {
+                                                    var term = normalize(input.value);
+                                                    var visible = 0;
+
+                                                    for (var i = 0; i < tbody.rows.length; i++) {
+                                                        var row = tbody.rows[i];
+                                                        if (row.classList.contains('search-no-results')) continue;
+
+                                                        var match = term === '' || normalize(row.textContent).indexOf(term) !== -1;
+                                                        row.style.display = match ? '' : 'none';
+                                                        if (match) visible++;
+                                                    }
+
+                                                    noResultsRow.style.display = visible === 0 ? '' : 'none';
+                                                };
+
+                                                input.addEventListener('input', runSearch);
+                                                input.addEventListener('keyup', runSearch);
+                                                runSearch();
+                                            }
+
+                                            if (document.readyState === 'loading') {
+                                                document.addEventListener('DOMContentLoaded', initRoomSearch);
+                                            } else {
+                                                initRoomSearch();
+                                            }
+                                        })();
+                                    </script>
