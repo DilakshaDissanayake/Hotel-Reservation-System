@@ -18,30 +18,34 @@
                         <form method="post" action="${pageContext.request.contextPath}/reservations" class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Guest Count</label>
-                                <input type="number" class="form-control" name="guestCount" min="1" value="1" required>
+                                <input type="number" class="form-control" name="guestCount" min="1"
+                                    value="${guestCountAttr != null ? guestCountAttr : '1'}" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Contact Number</label>
-                                <input type="text" class="form-control" name="contactNumber" required>
+                                <input type="text" class="form-control" name="contactNumber"
+                                    value="${contactNumberAttr}" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Room Type</label>
                                 <select class="form-select" name="roomType" required>
                                     <option value="">Select Type</option>
-                                    <option value="SINGLE">Single</option>
-                                    <option value="DOUBLE">Double</option>
-                                    <option value="DELUXE">Deluxe</option>
-                                    <option value="SUITE">Suite</option>
+                                    <option value="SINGLE" ${roomTypeAttr=='SINGLE' ? 'selected' : '' }>Single</option>
+                                    <option value="DOUBLE" ${roomTypeAttr=='DOUBLE' ? 'selected' : '' }>Double</option>
+                                    <option value="DELUXE" ${roomTypeAttr=='DELUXE' ? 'selected' : '' }>Deluxe</option>
+                                    <option value="SUITE" ${roomTypeAttr=='SUITE' ? 'selected' : '' }>Suite</option>
                                 </select>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Check In Date</label>
-                                <input type="date" class="form-control" name="checkInDate" required>
+                                <input type="date" class="form-control" name="checkInDate" value="${checkInDateAttr}"
+                                    required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Check Out Date</label>
-                                <input type="date" class="form-control" name="checkOutDate" required>
+                                <input type="date" class="form-control" name="checkOutDate" value="${checkOutDateAttr}"
+                                    required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Room</label>
@@ -49,41 +53,44 @@
                                     <option value="">Select Room</option>
                                     <% if (rooms !=null) { for (Object roomObj : rooms) {
                                         pageContext.setAttribute("room", roomObj); %>
-                                        <option value="${room.id}">${room.roomNumber} (${room.roomType}) - LKR
-                                            ${room.ratePerNight}</option>
+                                        <option value="${room.id}" ${roomIdAttr==room.id ? 'selected' : '' }>
+                                            ${room.roomNumber} (${room.roomType}) - LKR ${room.ratePerNight}
+                                        </option>
                                         <% } } %>
                                 </select>
                             </div>
 
                             <div class="col-12">
                                 <label class="form-label">Address</label>
-                                <input type="text" class="form-control" name="address">
+                                <input type="text" class="form-control" name="address" value="${addressAttr}">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label">Primary Guest Full Name</label>
-                                <input type="text" class="form-control" name="guestFullName" required>
+                                <input type="text" class="form-control" name="guestFullName"
+                                    value="${guestFullNameAttr}" required>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Age</label>
-                                <input type="number" class="form-control" name="guestAge" min="0">
+                                <input type="number" class="form-control" name="guestAge" min="0"
+                                    value="${guestAgeAttr}">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">NIC</label>
-                                <input type="text" class="form-control" name="nic">
+                                <input type="text" class="form-control" name="nic" value="${nicAttr}">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Passport No</label>
-                                <input type="text" class="form-control" name="passportNo">
+                                <input type="text" class="form-control" name="passportNo" value="${passportNoAttr}">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Guest Email</label>
-                                <input type="email" class="form-control" name="email" required>
+                                <input type="email" class="form-control" name="email" value="${emailAttr}" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Guest Phone</label>
-                                <input type="text" class="form-control" name="phoneNumber">
+                                <input type="text" class="form-control" name="phoneNumber" value="${phoneNumberAttr}">
                             </div>
 
                             <div class="col-12">
