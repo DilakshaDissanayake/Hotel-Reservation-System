@@ -1,0 +1,128 @@
+@startuml
+' Hotel Reservation System - Advanced Use Case Diagram
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F8FBFF
+  BorderColor #2F4F6F
+  ArrowColor #2F4F6F
+}
+skinparam actor {
+  BorderColor #1E3A56
+  BackgroundColor #EEF5FC
+}
+skinparam rectangle {
+  BorderColor #1E3A56
+  BackgroundColor #FFFFFF
+}
+
+actor "Staff User" as Staff
+actor Admin
+actor Receptionist
+actor "Hotel Guest" as Guest
+actor "Email Service (SMTP)" as Email
+
+Staff <|-- Admin
+Staff <|-- Receptionist
+
+rectangle "Hotel Reservation & Billing System" {
+  (Login) as UC_Login
+  (Logout) as UC_Logout
+  (View Dashboard) as UC_Dashboard
+  (View Profile) as UC_Profile
+
+  (Recover Password) as UC_ForgotPwd
+  (Reset Password) as UC_ResetPwd
+  (Validate Reset Token) as UC_ValidateToken
+  (Send Password Reset Email) as UC_SendResetEmail
+
+  (View Rooms) as UC_ViewRooms
+  (Search Rooms) as UC_SearchRooms
+  (Add Room) as UC_AddRoom
+  (Update Room) as UC_UpdateRoom
+
+  (View Active Reservations) as UC_ViewActiveRes
+  (View Reservation History) as UC_ViewResHistory
+  (Search Reservations) as UC_SearchRes
+  (Create Reservation) as UC_CreateRes
+  (Capture Primary Guest Details) as UC_PrimaryGuest
+  (Capture Additional Stay Details) as UC_StayDetails
+  (Validate Stay Dates) as UC_ValidateDates
+  (Check Room Availability) as UC_CheckAvailability
+
+  (Open Billing Page) as UC_OpenBilling
+  (Process Payment and Generate Bill) as UC_GenBill
+  (Record Extras) as UC_RecordExtras
+  (Apply Discount) as UC_ApplyDiscount
+  (Print Bill) as UC_PrintBill
+  (Email Bill to Guest) as UC_EmailBill
+  (Complete and Close Reservation) as UC_CompleteRes
+  (Release Room as Available) as UC_ReleaseRoom
+
+  (View Staff List) as UC_ViewStaff
+  (Add Staff Member) as UC_AddStaff
+}
+
+Staff --> UC_Login
+Staff --> UC_Logout
+Staff --> UC_Dashboard
+Staff --> UC_Profile
+Staff --> UC_ViewRooms
+Staff --> UC_SearchRooms
+Staff --> UC_ViewActiveRes
+Staff --> UC_ViewResHistory
+Staff --> UC_SearchRes
+Staff --> UC_OpenBilling
+Staff --> UC_PrintBill
+
+Receptionist --> UC_CreateRes
+Receptionist --> UC_GenBill
+Receptionist --> UC_CompleteRes
+
+Admin --> UC_AddRoom
+Admin --> UC_UpdateRoom
+Admin --> UC_ViewStaff
+Admin --> UC_AddStaff
+
+Staff --> UC_ForgotPwd
+Staff --> UC_ResetPwd
+
+Guest --> UC_PrimaryGuest
+Guest --> UC_EmailBill
+
+Email --> UC_SendResetEmail
+Email --> UC_EmailBill
+
+UC_ForgotPwd .> UC_SendResetEmail : <<include>>
+UC_ResetPwd .> UC_ValidateToken : <<include>>
+
+UC_CreateRes .> UC_PrimaryGuest : <<include>>
+UC_CreateRes .> UC_StayDetails : <<include>>
+UC_CreateRes .> UC_ValidateDates : <<include>>
+UC_CreateRes .> UC_CheckAvailability : <<include>>
+
+UC_GenBill .> UC_RecordExtras : <<include>>
+UC_GenBill .> UC_ApplyDiscount : <<include>>
+UC_GenBill .> UC_EmailBill : <<include>>
+
+UC_GenBill ..> UC_OpenBilling : <<extend>>
+UC_PrintBill ..> UC_OpenBilling : <<extend>>
+UC_CompleteRes ..> UC_OpenBilling : <<extend>>
+
+UC_CompleteRes .> UC_ReleaseRoom : <<include>>
+
+note right of UC_AddRoom
+  Admin-only in current implementation.
+end note
+
+note right of UC_UpdateRoom
+  Admin-only in current implementation.
+end note
+
+note right of UC_AddStaff
+  Admin-only in current implementation.
+end note
+
+@enduml

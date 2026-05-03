@@ -9,7 +9,7 @@
 			+ New Reservation
 		</a>
 	</div>
-
+ 
 	<div class="row g-3 mb-4">
 		<div class="col-md-6 col-lg-3">
 			<div class="card shadow-sm h-100">

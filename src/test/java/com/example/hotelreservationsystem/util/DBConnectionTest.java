@@ -15,6 +15,7 @@ class DBConnectionTest {
         try (Connection connection = DBConnection.getConnection()) {
 
             assertNotNull(connection, "Connection should not be null");
+
             assertFalse(connection.isClosed(), "Connection should be open");
 
         } catch (Exception e) {

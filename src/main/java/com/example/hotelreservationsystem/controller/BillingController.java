@@ -89,12 +89,10 @@ public class BillingController extends HttpServlet {
         try {
             emailSent = reservationService.sendBillToGuest(reservationId);
         } catch (Exception e) {
-            // Log is handled by EmailService, just catch here to prevent redirect failure
         }
         
         String message = emailSent ? "Payment saved. Bill emailed to guest." : "Payment saved. Bill ready to print.";
         if (!emailSent && request.getParameter("extrasTotal") != null) {
-             // If we tried to send but it failed (logic in sendBillToGuest returns false or we caught an exception)
              message = "Payment saved but email could not be sent. Bill ready to print.";
         }
         response.sendRedirect(request.getContextPath() + "/biling?reservationId=" + reservationId + "&message=" + encode(message));
